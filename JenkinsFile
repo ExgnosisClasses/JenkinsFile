@@ -9,7 +9,7 @@ pipeline {
         }
     stage('Unit-Test') {
             steps {
-                exho 'Unit Test'
+                echo 'Unit Test'
              
                 
             }
