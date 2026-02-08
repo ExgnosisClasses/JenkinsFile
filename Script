@@ -1,0 +1,54 @@
+// Scripted Pipeline (Groovy) example
+// Paste into: New Item -> Pipeline -> Pipeline script
+
+def buildLabel = env.BUILD_TAG ?: "unknown"
+def targets = ["unit", "integration"]   // demonstrates Groovy list + iteration
+
+node('built-in') {                      // Declarative uses: agent any / agent { label '...' }
+    timestamps {
+        try {
+            stage('Checkout') {
+                echo "Build: ${buildLabel}"
+                echo "Workspace: ${pwd()}"
+                // For demo purposes, just create a file (no SCM required)
+                writeFile file: 'README.txt', text: "Hello from Scripted Pipeline!\n"
+            }
+
+            stage('Build') {
+                echo "Simulating a build..."
+                if (isUnix()) {
+                    sh 'ls -la'
+                } else {
+                    bat 'dir'
+                }
+            }
+
+            stage('Test') {
+                // Scripted pipelines use normal Groovy control flow
+                for (t in targets) {
+                    echo "Running ${t} tests..."
+                    if (t == "integration") {
+                        // Demonstrate failure handling
+                        //echo "Simulating a test failure in integration tests"
+                        //error("Integration tests failed (intentional demo)")
+                    }
+                }
+            }
+
+            stage('Archive') {
+                archiveArtifacts artifacts: 'README.txt', fingerprint: true
+                echo "Artifact archived"
+            }
+
+        } catch (err) {
+            // Declarative uses: post { failure { ... } }
+            currentBuild.result = 'FAILURE'
+            echo "Caught error: ${err}"
+            throw err
+
+        } finally {
+            // Declarative uses: post { always { ... } }
+            echo "Always runs (cleanup / notifications)"
+        }
+    }
+}
