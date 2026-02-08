@@ -4,7 +4,7 @@ pipeline {
         stage('Example') {
             steps {
                 echo "Running ${env.BUILD_TAG} on ${env.JENKINS_URL}"
-                echo "java ${env.JAVA_HOME}"
+                echo "Workspace ${env.WORKSPACE}"
             }
         }
     }
